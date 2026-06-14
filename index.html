@@ -590,6 +590,36 @@ textarea::placeholder,input::placeholder{color:var(--dimmer);font-size:.85rem}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
 @media(max-width:480px){.two-col{grid-template-columns:1fr}}
 
+/* ── VALIDATION ERROR STATE ── */
+.card-error{
+  border-color:var(--red) !important;
+  box-shadow:0 0 0 2px #cc224020;
+}
+.card-error::before{
+  background:linear-gradient(90deg,transparent,var(--red),transparent) !important;
+  opacity:.7 !important;
+}
+.card-library-vote.card-error{
+  border-color:var(--red) !important;
+  box-shadow:0 0 0 2px #cc224020 !important;
+}
+#validationBanner{
+  display:none;
+  background:#1a0810;
+  border:1px solid var(--red);
+  border-left:3px solid var(--red);
+  border-radius:var(--r);
+  padding:.85rem 1.1rem;
+  margin-bottom:1.25rem;
+  font-size:.84rem;color:#cc8090;
+  line-height:1.6;
+}
+#validationBanner strong{
+  font-family:'Chakra Petch',monospace;
+  color:var(--red);font-size:.8rem;letter-spacing:.08em;
+  text-transform:uppercase;display:block;margin-bottom:.3rem;
+}
+
 /* ── SUBMIT ── */
 .submit-zone{text-align:center;margin-top:2.25rem}
 #submitBtn{
@@ -992,6 +1022,11 @@ footer a:hover{color:var(--text)}
   </div>
 </div>
 
+<div id="validationBanner">
+  <strong>&#9632; Required fields missing</strong>
+  <span id="validationMsg"></span>
+</div>
+
 <div class="submit-zone">
   <button type="submit" id="submitBtn">Submit Survey</button>
 </div>
@@ -1192,7 +1227,12 @@ function updateProgress() {
 document.querySelectorAll('input,textarea').forEach(el => {
   el.addEventListener(
     (el.type === 'radio' || el.type === 'checkbox') ? 'change' : 'input',
-    updateProgress
+    function() {
+      // Remove error highlight from the card this input belongs to
+      const card = el.closest('.card, .card-library-vote');
+      if (card) card.classList.remove('card-error');
+      updateProgress();
+    }
   );
 });
 
@@ -1203,6 +1243,72 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw7EUu-mwPUUENwiKTT08
 
 document.getElementById('surveyForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  // ── VALIDATION ────────────────────────────────────────────────
+  // Define required fields and which card element to highlight.
+  const required = [
+    {
+      id:    'q1',
+      card:  document.querySelector('[name="awareness"]')?.closest('.card'),
+      check: () => !!document.querySelector('[name="awareness"]:checked'),
+      label: 'Question 1 — Had you heard of Script Studio?',
+    },
+    {
+      id:    'q2',
+      card:  document.querySelector('[name="source"]')?.closest('.card'),
+      check: () => document.querySelectorAll('[name="source"]:checked').length > 0,
+      label: 'Question 2 — How do you currently get scripts?',
+    },
+    {
+      id:    'q3',
+      card:  document.querySelector('[name="library_vote"]')?.closest('.card-library-vote'),
+      check: () => !!document.querySelector('[name="library_vote"]:checked'),
+      label: 'Question 3 — Should Script Studio have a library?',
+    },
+    {
+      id:    'q4',
+      card:  document.querySelector('[name="features"]')?.closest('.card'),
+      check: () => document.querySelectorAll('[name="features"]:checked').length > 0,
+      label: 'Question 4 — Which features sound useful?',
+    },
+    {
+      id:    'q7',
+      card:  document.querySelector('[name="dream_feature"]')?.closest('.card'),
+      check: () => (document.querySelector('[name="dream_feature"]')?.value || '').trim().length > 0,
+      label: 'Question 7 — Your one feature idea',
+    },
+    {
+      id:    'q8',
+      card:  document.querySelector('[name="pain"]')?.closest('.card'),
+      check: () => (document.querySelector('[name="pain"]')?.value || '').trim().length > 0,
+      label: 'Question 8 — Biggest frustration with AoC scripts',
+    },
+  ];
+
+  // Clear previous error states
+  required.forEach(f => f.card && f.card.classList.remove('card-error'));
+  document.getElementById('validationBanner').style.display = 'none';
+
+  // Check each field
+  const missing = required.filter(f => !f.check());
+
+  if (missing.length > 0) {
+    // Highlight each missing card
+    missing.forEach(f => f.card && f.card.classList.add('card-error'));
+
+    // Show banner with list of what's missing
+    document.getElementById('validationMsg').textContent =
+      'Please complete: ' + missing.map(f => f.label).join(' · ');
+    const banner = document.getElementById('validationBanner');
+    banner.style.display = 'block';
+
+    // Scroll to the first missing card
+    const firstCard = missing[0].card;
+    if (firstCard) {
+      firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return; // stop submit
+  }
 
   const btn = document.getElementById('submitBtn');
   btn.textContent = 'Sending…';
