@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>AoC Script Studio — Community Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#09070d;
+  --surface:#100d15;
+  --panel:#15101c;
+  --panel-raised:#1b1425;
+  --border:#251535;
+  --border-mid:#3d2255;
+  --border-lit:#5c3078;
+  --purple:#a020c8;
+  --purple-bright:#c040e8;
+  --cyan:#00ccee;
+  --gold:#c89000;
+  --gold-bright:#e8aa10;
+  --red:#cc2240;
+  --green:#18a848;
+  --green-bright:#22c858;
+  --orange:#cc5500;
+  --text:#ccc0da;
+  --text-strong:#e8dff5;
+  --dim:#706080;
+  --dimmer:#3d2d50;
+  --r:4px;
+  --r-lg:6px;
+}
+
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter','Segoe UI',system-ui,sans-serif;
+  font-size:15px;line-height:1.6;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* ── AMBIENT — subtle, not loud ── */
+.ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 45% at 10% 0%,#1e0330 0%,transparent 60%),
+    radial-gradient(ellipse 40% 35% at 90% 95%,#001020 0%,transparent 55%);
+}
+
+/* ── LAYOUT ── */
+.wrap{
+  position:relative;z-index:1;
+  max-width:860px;margin:0 auto;
+  padding:0 1.5rem 5rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HERO — Windows desktop mockup of Script Studio
+   Professional "product screenshot" framing.
+   ══════════════════════════════════════════════════════════ */
+.hero{
+  text-align:center;
+  padding:3rem 0 0;
+  margin-bottom:2.5rem;
+}
+
+.hero-eyebrow{
+  font-family:'Chakra Petch',monospace;
+  font-size:.65rem;letter-spacing:.45em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:.75rem;
+  opacity:.8;
+}
+
+.hero h1{
+  font-family:'Chakra Petch',monospace;
+  font-size:clamp(1.9rem,5vw,3rem);
+  font-weight:700;letter-spacing:.04em;line-height:1.1;
+  color:var(--text-strong);
+  margin-bottom:.4rem;
+}
+/* Subtle gradient only on the word Studio */
+.hero h1 span{
+  background:linear-gradient(135deg,#c040e8 0%,#00ccee 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.hero-sub{
+  font-size:.95rem;color:var(--dim);
+  max-width:540px;margin:.5rem auto 0;
+  font-weight:400;line-height:1.6;
+}
+
+/* ── WINDOWS DESKTOP FRAME ── */
+.win-desktop{
+  background:#1a0d28;
+  border:1px solid var(--border-lit);
+  border-radius:var(--r-lg);
+  margin:2rem auto 0;
+  max-width:720px;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px #0a0510,
+    0 8px 40px #00000080,
+    0 0 60px #a020c810;
+}
+
+/* Windows-style titlebar */
+.win-titlebar{
+  background:linear-gradient(to right,#1e0e30,#140a20);
+  border-bottom:1px solid #3d2255;
+  padding:.4rem .75rem;
+  display:flex;align-items:center;justify-content:space-between;
+  user-select:none;
+}
+.win-titlebar-left{
+  display:flex;align-items:center;gap:.5rem;
+}
+.win-icon{
+  width:14px;height:14px;
+  background:linear-gradient(135deg,#a020c8,#00ccee);
+  border-radius:2px;flex-shrink:0;
+}
+.win-title{
+  font-family:'Chakra Petch',monospace;
+  font-size:.66rem;color:#9070b8;letter-spacing:.12em;
+}
+.win-controls{display:flex;gap:0;align-items:stretch}
+.wc-btn{
+  width:32px;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;color:#5a3878;cursor:default;
+  transition:background .1s,color .1s;
+  line-height:1;
+}
+.wc-btn:hover{background:#2a1540;color:#a070c8}
+.wc-btn.wc-cls:hover{background:#aa1020;color:#fff}
+
+/* Studio app layout */
+.win-body{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  grid-template-rows:auto 1fr;
+  height:300px;
+}
+
+/* Toolbar strip */
+.win-toolbar{
+  grid-column:1/-1;
+  background:#110918;
+  border-bottom:1px solid #2a1540;
+  padding:.35rem .75rem;
+  display:flex;align-items:center;gap:.4rem;
+  flex-wrap:wrap;
+}
+.tb-group{
+  display:flex;gap:.25rem;align-items:center;
+  padding-right:.5rem;
+  border-right:1px solid #2a1540;
+}
+.tb-group:last-child{border-right:none}
+.tb-btn{
+  background:#1e1030;
+  border:1px solid #3d2255;
+  border-radius:3px;
+  padding:.2rem .5rem;
+  font-family:'Chakra Petch',monospace;
+  font-size:.58rem;letter-spacing:.05em;
+  color:#9070b8;
+  cursor:default;white-space:nowrap;
+}
+.tb-btn-active{
+  background:#2a1845;border-color:#6030a0;color:#c080f0;
+}
+.tb-sep{width:1px;height:16px;background:#2a1540;margin:0 .15rem}
+
+/* Left panel — library placeholder */
+.win-sidebar{
+  background:#0e0916;
+  border-right:1px solid #2a1540;
+  padding:.6rem .5rem;
+  overflow:hidden;
+}
+.sidebar-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:calc(100% - 1.5rem);padding:.75rem .5rem;text-align:center;
+}
+.sidebar-empty-icon{
+  font-size:1.4rem;color:#2e1a38;margin-bottom:.5rem;line-height:1;
+}
+.sidebar-empty-title{
+  font-family:'Chakra Petch',monospace;font-size:.62rem;
+  color:#4a2860;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:.4rem;
+}
+.sidebar-empty-desc{
+  font-size:.65rem;color:#3a1f4a;line-height:1.5;
+}
+.sidebar-label{
+  font-family:'Chakra Petch',monospace;
+  font-size:.55rem;letter-spacing:.2em;color:#5a3878;
+  text-transform:uppercase;margin-bottom:.5rem;padding-left:.25rem;
+}
+.sidebar-item{
+  padding:.28rem .5rem;border-radius:3px;margin-bottom:.18rem;
+  font-size:.7rem;color:#7058a0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.sidebar-item.active{background:#1e1030;color:#b090d8;border-left:2px solid #7030a8}
+.sidebar-cat{
+  font-size:.58rem;color:#3d2255;letter-spacing:.15em;text-transform:uppercase;
+  padding:.5rem .25rem .2rem;
+}
+
+/* Right — editor + preview split */
+.win-main{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  overflow:hidden;
+}
+.win-editor{
+  background:#0c0814;
+  border-right:1px solid #2a1540;
+  padding:.6rem .7rem;
+  overflow:hidden;
+  position:relative;
+}
+.editor-label{
+  font-family:'Chakra Petch',monospace;
+  font-size:.55rem;letter-spacing:.2em;color:#5a3878;
+  text-transform:uppercase;margin-bottom:.5rem;
+}
+.editor-line{
+  font-family:'Cascadia Code','Consolas','Courier New',monospace;
+  font-size:.68rem;line-height:1.6;color:#a080c8;
+  white-space:pre;overflow:hidden;
+  display:block;
+}
+.el-tag{color:#7030a8}.el-color{color:#c040e8}.el-text{color:#c0b0d8}.el-icon{color:#00aacc}
+.el-dim{color:#4a3060}
+.editor-cursor{
+  display:inline-block;width:6px;height:11px;
+  background:#c040e8;vertical-align:middle;margin-left:1px;
+  animation:blink .9s step-end infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Right — preview pane */
+.win-preview{
+  background:#100820;
+  padding:.6rem .7rem;
+  overflow:hidden;
+}
+.preview-label{
+  font-family:'Chakra Petch',monospace;
+  font-size:.55rem;letter-spacing:.2em;color:#5a3878;
+  text-transform:uppercase;margin-bottom:.5rem;
+}
+/* In-game chat preview simulation */
+.chat-window{
+  background:#080610;
+  border:1px solid #1e1030;
+  border-radius:2px;
+  padding:.4rem .5rem;
+  height:220px;
+  overflow:hidden;
+}
+.chat-line{
+  font-family:'Cascadia Code','Consolas',monospace;
+  font-size:.68rem;line-height:1.7;
+  display:block;
+}
+.chat-line.anim{
+  animation:fadein .5s ease forwards;opacity:0;
+}
+@keyframes fadein{to{opacity:1}}
+.ch-gold{color:#c89000}.ch-cyan{color:#00aacc}.ch-red{color:#cc3050}
+.ch-purple{color:#a060d0}.ch-green{color:#18a848}.ch-dim{color:#4a3060}
+.ch-white{color:#c0b8d0}
+
+/* Status bar */
+.win-statusbar{
+  grid-column:1/-1;
+  background:#0a0712;
+  border-top:1px solid #1e1030;
+  padding:.22rem .75rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.status-text{font-size:.6rem;color:#4a3060;font-family:'Chakra Petch',monospace;letter-spacing:.08em}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 4px var(--green);
+  display:inline-block;margin-right:.35rem;
+}
+
+/* ── INTRO BLOCK ── */
+.intro-section{
+  margin:2.5rem 0 2rem;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:1.75rem 2rem 2rem;position:relative;overflow:hidden;
+}
+.intro-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.4;
+}
+.intro-title{
+  font-family:'Chakra Petch',monospace;
+  font-size:1rem;color:var(--text-strong);letter-spacing:.04em;
+  margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);
+}
+.feature-pills{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1.1rem}
+.fpill{
+  background:#130e1c;border:1px solid var(--border-mid);border-radius:3px;
+  padding:.25rem .75rem;font-size:.78rem;color:var(--dim);
+  font-family:'Inter',sans-serif;
+  display:flex;align-items:center;gap:.35rem;letter-spacing:.01em;
+}
+.fpill-dot{width:5px;height:5px;border-radius:50%;background:var(--purple-bright);flex-shrink:0}
+.intro-text{font-size:.88rem;color:var(--dim);line-height:1.75}
+.intro-text strong{color:var(--text)}
+
+/* ── STORAGE NOTICE ── */
+.storage-notice{
+  background:#0d0a15;
+  border:1px solid var(--border-mid);
+  border-left:2px solid var(--purple);
+  border-radius:var(--r);
+  padding:.85rem 1.1rem;
+  margin:0 0 1.5rem;
+  font-size:.83rem;color:var(--dim);
+  display:flex;align-items:flex-start;gap:.65rem;
+}
+.sn-icon{
+  font-size:.85rem;margin-top:.1rem;flex-shrink:0;
+  color:var(--purple);font-style:normal;
+}
+.storage-notice strong{color:var(--text)}
+
+/* ── PROGRESS BAR ── */
+.progress-zone{
+  position:sticky;top:0;z-index:10;
+  background:var(--bg);padding:.55rem 0 .35rem;
+  margin-bottom:1.75rem;border-bottom:1px solid var(--border);
+}
+.progress-bar-bg{height:2px;background:#1e1228;border-radius:1px;overflow:hidden}
+.progress-bar-fg{
+  height:100%;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  border-radius:1px;transition:width .4s ease;
+}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-top:.3rem}
+.progress-text{font-size:.7rem;color:var(--dimmer);letter-spacing:.04em}
+.progress-pct{
+  font-family:'Chakra Petch',monospace;font-size:.7rem;
+  color:var(--purple-bright);
+}
+
+/* ── CARDS ── */
+.card{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:1.5rem 1.75rem 1.8rem;margin-bottom:1.25rem;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:.5;
+}
+.card-cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.4}
+.card-gold::before{background:linear-gradient(90deg,transparent,var(--gold-bright),transparent);opacity:.45}
+.card-green::before{background:linear-gradient(90deg,transparent,var(--green-bright),transparent);opacity:.4}
+.card-orange::before{background:linear-gradient(90deg,transparent,var(--orange),transparent);opacity:.4}
+
+/* Library vote card — hero card */
+.card-library-vote{
+  background:#110e1a;
+  border:1px solid var(--border-lit);
+  border-radius:var(--r-lg);
+  padding:1.5rem 1.75rem 1.8rem;
+  margin-bottom:1.25rem;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 30px #a020c810;
+}
+.card-library-vote::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,#c040e8,#00ccee,#c040e8,transparent);
+}
+
+/* ── LABELS ── */
+.q-label{
+  font-family:'Chakra Petch',monospace;font-size:.6rem;
+  letter-spacing:.35em;text-transform:uppercase;
+  color:var(--purple-bright);margin-bottom:.4rem;display:block;
+}
+.q-label.cl{color:var(--cyan)}
+.q-label.gl{color:var(--gold-bright)}
+.q-label.gr{color:var(--green-bright)}
+.q-label.or{color:var(--orange)}
+
+.q-title{
+  font-family:'Chakra Petch',monospace;font-size:1rem;font-weight:600;
+  color:var(--text-strong);margin-bottom:.3rem;line-height:1.35;letter-spacing:.02em;
+}
+.q-hint{font-size:.8rem;color:var(--dim);margin-bottom:1rem;line-height:1.55}
+
+/* ── CHECKBOXES ── */
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .75rem}
+@media(max-width:500px){.chk-grid{grid-template-columns:1fr}}
+
+.chk{
+  display:flex;align-items:flex-start;gap:.5rem;padding:.45rem .6rem;
+  border-radius:var(--r);border:1px solid transparent;cursor:pointer;
+  transition:border-color .12s,background .12s;
+}
+.chk:hover{border-color:var(--border-mid);background:#140f1e}
+.chk:has(input:checked){border-color:var(--border-lit);background:#180e26}
+
+.chk input[type=checkbox]{
+  appearance:none;-webkit-appearance:none;
+  width:15px;height:15px;min-width:15px;
+  border:1px solid var(--border-lit);border-radius:2px;
+  margin-top:3px;cursor:pointer;position:relative;transition:all .12s;
+}
+.chk input[type=checkbox]:checked{
+  background:var(--purple);border-color:var(--purple);
+}
+.chk input[type=checkbox]:checked::after{
+  content:'✓';position:absolute;
+  top:-2px;left:1px;font-size:10px;color:#fff;font-weight:700;
+}
+.chk-text{font-size:.85rem;color:var(--text);line-height:1.3;cursor:pointer}
+.chk-text small{display:block;font-size:.73rem;color:var(--dim);margin-top:1px}
+
+/* ── RADIO PILLS ── */
+.rpills{display:flex;flex-wrap:wrap;gap:.45rem}
+.rpill{
+  display:flex;align-items:center;gap:.4rem;padding:.35rem .85rem;
+  border-radius:var(--r);border:1px solid var(--border-mid);cursor:pointer;
+  font-size:.84rem;color:var(--dim);transition:all .15s;
+}
+.rpill:hover{border-color:var(--border-lit);color:var(--text)}
+.rpill:has(input:checked){
+  border-color:var(--cyan);color:var(--cyan);
+}
+.rpill input[type=radio]{
+  appearance:none;-webkit-appearance:none;
+  width:10px;height:10px;border-radius:50%;
+  border:1px solid var(--border-lit);transition:all .12s;
+}
+.rpill:has(input:checked) input[type=radio]{
+  background:var(--cyan);border-color:var(--cyan);
+}
+
+/* ── LIBRARY VOTE TILES ── */
+.lib-vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.5rem}
+@media(max-width:500px){.lib-vote-grid{grid-template-columns:1fr}}
+
+.lib-vote-opt{
+  border:1px solid var(--border-mid);border-radius:var(--r-lg);
+  padding:.9rem 1rem 1rem;cursor:pointer;
+  background:#0e0b18;transition:all .18s;
+  position:relative;overflow:hidden;
+}
+.lib-vote-opt:hover{border-color:var(--border-lit);background:#140e22}
+.lib-vote-opt:has(input:checked){
+  border-color:var(--purple-bright);background:#170e26;
+  box-shadow:0 0 14px #a020c818;
+}
+.lib-vote-opt input[type=radio]{display:none}
+
+.lib-vote-check{
+  position:absolute;top:.65rem;right:.65rem;
+  width:16px;height:16px;border-radius:50%;
+  border:1px solid var(--border-lit);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;color:transparent;transition:all .15s;
+}
+.lib-vote-opt:has(input:checked) .lib-vote-check{
+  background:var(--purple);border-color:var(--purple);color:#fff;
+}
+
+.lib-vote-indicator{
+  width:28px;height:3px;border-radius:2px;margin-bottom:.6rem;
+  background:var(--border-lit);transition:background .2s;
+}
+.lib-vote-opt:has(input:checked) .lib-vote-indicator{background:var(--purple-bright)}
+
+.lib-vote-label{
+  font-family:'Chakra Petch',monospace;font-size:.82rem;font-weight:600;
+  color:var(--text-strong);display:block;margin-bottom:.2rem;letter-spacing:.02em;
+}
+.lib-vote-desc{font-size:.76rem;color:var(--dim);line-height:1.45}
+
+/* ── STAR RATINGS ── */
+.star-rows{display:flex;flex-direction:column;gap:.55rem}
+.star-row{
+  display:grid;grid-template-columns:1fr auto;
+  align-items:center;gap:.75rem;
+  padding:.45rem .6rem;border-radius:var(--r);
+  border:1px solid transparent;transition:background .12s,border-color .12s;
+}
+.star-row:hover{background:#130e1e;border-color:var(--border)}
+.star-row-label{font-size:.86rem;color:var(--text)}
+.star-row-label small{display:block;font-size:.72rem;color:var(--dim);margin-top:1px}
+.stars{display:flex;gap:2px}
+.star{
+  font-size:1.15rem;cursor:pointer;color:var(--border-lit);
+  transition:color .1s;user-select:none;line-height:1;
+}
+.star.lit{color:var(--gold-bright)}
+
+/* ── LIKERT TABLE ── */
+.likert-wrap{overflow-x:auto;padding-bottom:.4rem}
+.likert-table{width:100%;border-collapse:collapse;min-width:380px}
+.likert-table th{
+  font-size:.68rem;letter-spacing:.06em;color:var(--dimmer);font-weight:500;
+  text-align:center;padding:.3rem .25rem;border-bottom:1px solid var(--border);
+  font-family:'Inter',sans-serif;
+}
+.likert-table th:first-child{text-align:left;padding-left:.5rem}
+.likert-table td{
+  text-align:center;padding:.5rem .25rem;
+  border-bottom:1px solid var(--border);
+  font-size:.82rem;color:var(--text);
+}
+.likert-table td:first-child{text-align:left;padding-left:.5rem;font-size:.83rem}
+.likert-table tr:last-child td{border-bottom:none}
+.likert-table tbody tr:hover td{background:#130e1e}
+.likert-table input[type=radio]{
+  appearance:none;-webkit-appearance:none;
+  width:15px;height:15px;border-radius:50%;
+  border:1px solid var(--border-lit);cursor:pointer;
+  display:block;margin:0 auto;transition:all .12s;
+}
+.likert-table input[type=radio]:checked{
+  background:var(--purple);border-color:var(--purple);
+}
+
+/* ── STORAGE VOTE ── */
+.storage-vote-wrap{
+  margin-top:1.1rem;
+  background:#0c0916;border:1px solid var(--border);border-radius:var(--r);
+  padding:.9rem 1.1rem;
+}
+.storage-vote-title{
+  font-family:'Chakra Petch',monospace;font-size:.72rem;color:var(--purple-bright);
+  letter-spacing:.1em;margin-bottom:.4rem;text-transform:uppercase;
+}
+.storage-vote-desc{font-size:.79rem;color:var(--dim);margin-bottom:.75rem;line-height:1.55}
+.storage-vote-opts{display:flex;flex-wrap:wrap;gap:.45rem}
+.svopt{
+  display:flex;align-items:center;gap:.4rem;padding:.35rem .85rem;
+  border-radius:var(--r);border:1px solid var(--border-mid);cursor:pointer;
+  font-size:.82rem;color:var(--dim);transition:all .15s;
+}
+.svopt:hover{border-color:var(--border-lit);color:var(--text)}
+.svopt:has(input:checked.yes-save){border-color:var(--green-bright);color:var(--green-bright)}
+.svopt:has(input:checked.no-save){border-color:var(--red);color:#cc8090}
+.svopt input[type=radio]{
+  appearance:none;-webkit-appearance:none;
+  width:9px;height:9px;border-radius:50%;
+  border:1px solid var(--border-lit);transition:all .12s;
+}
+.svopt:has(input:checked) input[type=radio]{
+  background:currentColor;border-color:currentColor;
+}
+
+/* ── TEXTAREAS & INPUTS ── */
+.field-wrap{margin-bottom:.7rem}
+.field-label{
+  display:block;font-size:.7rem;color:var(--dim);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:.28rem;
+  font-family:'Inter',sans-serif;
+}
+textarea,input[type=text]{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border-mid);border-radius:var(--r);
+  color:var(--text-strong);
+  font-family:'Inter','Segoe UI',sans-serif;font-size:.88rem;
+  padding:.55rem .85rem;outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+textarea{min-height:90px;resize:vertical}
+textarea:focus,input[type=text]:focus{
+  border-color:var(--purple);box-shadow:0 0 0 2px #a020c820;
+}
+textarea::placeholder,input::placeholder{color:var(--dimmer);font-size:.85rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+@media(max-width:480px){.two-col{grid-template-columns:1fr}}
+
+/* ── SUBMIT ── */
+.submit-zone{text-align:center;margin-top:2.25rem}
+#submitBtn{
+  font-family:'Chakra Petch',monospace;font-size:.9rem;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  padding:.75rem 3.25rem;
+  border:1px solid var(--purple-bright);border-radius:var(--r);
+  background:#1a0830;
+  color:var(--purple-bright);
+  cursor:pointer;transition:all .18s;
+}
+#submitBtn:hover{
+  background:#240e40;border-color:var(--cyan);color:var(--cyan);
+  box-shadow:0 0 20px #a020c825;
+}
+#submitBtn:active{transform:scale(.99)}
+
+/* ── SUCCESS ── */
+#successPanel{
+  display:none;background:#0c1210;border:1px solid #1a6028;
+  border-radius:var(--r-lg);padding:2.5rem;text-align:center;margin-top:2rem;
+}
+#successPanel h2{
+  font-family:'Chakra Petch',monospace;color:var(--green-bright);
+  font-size:1.3rem;margin-bottom:.4rem;letter-spacing:.04em;
+}
+#successPanel p{color:#5a9068;font-size:.88rem;line-height:1.65}
+#savedNote{
+  margin-top:.85rem;font-size:.74rem;color:var(--dimmer);
+  font-family:'Chakra Petch',monospace;letter-spacing:.08em;
+}
+
+/* ── SECTION DIVIDER ── */
+.sect-divider{
+  display:flex;align-items:center;gap:1rem;
+  margin:2.25rem 0 1.75rem;
+}
+.sect-divider::before,.sect-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.sect-divider span{
+  font-family:'Chakra Petch',monospace;font-size:.6rem;
+  letter-spacing:.35em;color:var(--dimmer);text-transform:uppercase;white-space:nowrap;
+}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;margin-top:3rem;
+  font-size:.72rem;color:var(--dimmer);
+  letter-spacing:.06em;border-top:1px solid var(--border);padding-top:1.25rem;
+}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-eyebrow">Age of Conan · Spartans Community · Community Survey</div>
+  <h1>AoC <span>Script Studio</span></h1>
+  <p class="hero-sub">A tool for writing and previewing in-game chat scripts and macros — built by Ep1cshovel. You might not have heard of it yet. That's exactly why we're asking.</p>
+
+  <!-- Windows desktop mockup -->
+  <div class="win-desktop">
+
+    <div class="win-titlebar">
+      <div class="win-titlebar-left">
+        <div class="win-icon"></div>
+        <span class="win-title">AOC SCRIPT STUDIO — by Ep1cshovel</span>
+      </div>
+      <div class="win-controls">
+        <div class="wc-btn">&#8722;</div>
+        <div class="wc-btn">&#9633;</div>
+        <div class="wc-btn wc-cls">&#10005;</div>
+      </div>
+    </div>
+
+    <div class="win-body">
+
+      <!-- Toolbar -->
+      <div class="win-toolbar">
+        <div class="tb-group">
+          <div class="tb-btn tb-btn-active">Bold Color</div>
+          <div class="tb-btn">Italic</div>
+          <div class="tb-btn">Underline</div>
+        </div>
+        <div class="tb-group">
+          <div class="tb-btn">Color Wrap</div>
+          <div class="tb-btn">Icon Picker</div>
+        </div>
+        <div class="tb-group">
+          <div class="tb-btn">Clear</div>
+          <div class="tb-btn">Copy</div>
+          <div class="tb-btn tb-btn-active">Preview</div>
+        </div>
+      </div>
+
+      <!-- Sidebar — no library in this version -->
+      <div class="win-sidebar">
+        <div class="sidebar-label">Script Library</div>
+        <div class="sidebar-empty">
+          <div class="sidebar-empty-icon">&#9723;</div>
+          <div class="sidebar-empty-title">No library loaded</div>
+          <div class="sidebar-empty-desc">This build ships without a script library. Vote below to decide whether one gets added.</div>
+        </div>
+      </div>
+
+      <!-- Main area: editor + preview -->
+      <div class="win-main">
+
+        <div class="win-editor">
+          <div class="editor-label">Editor</div>
+          <span class="editor-line"><span class="el-dim">// Commander Yeng tactics</span></span>
+          <span class="editor-line"><span class="el-tag">&lt;font</span> <span class="el-color">color=legendary</span><span class="el-tag">&gt;</span><span class="el-text">PHASE 1</span><span class="el-tag">&lt;/font&gt;</span></span>
+          <span class="editor-line"><span class="el-tag">&lt;font</span> <span class="el-color">color=red</span><span class="el-tag">&gt;</span><span class="el-text">TANKS south wall</span><span class="el-tag">&lt;/font&gt;</span></span>
+          <span class="editor-line"><span class="el-tag">&lt;font</span> <span class="el-color">color=green</span><span class="el-tag">&gt;</span><span class="el-text">Healers stack B</span><span class="el-tag">&lt;/font&gt;</span></span>
+          <span class="editor-line"><span class="el-icon">rdb://791040</span> <span class="el-dim">icon ref</span></span>
+          <span class="editor-line"><span class="el-tag">&lt;br&gt;</span><span class="el-text">Interrupt Wrath!</span><span class="editor-cursor"></span></span>
+        </div>
+
+        <div class="win-preview">
+          <div class="preview-label">In-Game Preview</div>
+          <div class="chat-window" id="chatWindow">
+            <span class="chat-line ch-dim">— Script Studio Preview —</span>
+          </div>
+        </div>
+
+      </div><!-- /win-main -->
+
+    </div><!-- /win-body -->
+
+    <div class="win-statusbar">
+      <span class="status-text"><span class="status-dot"></span>Ready · 6 lines · 184 chars</span>
+      <span class="status-text">AoC Script Studio v1.0 · Ep1cshovel</span>
+    </div>
+
+  </div><!-- /win-desktop -->
+</div><!-- /hero -->
+
+<!-- ══ WHAT IS IT ══ -->
+<div class="intro-section">
+  <div class="intro-title">What is AoC Script Studio?</div>
+  <div class="feature-pills">
+    <span class="fpill"><span class="fpill-dot"></span>Write chat scripts &amp; macros</span>
+    <span class="fpill"><span class="fpill-dot"></span>Live in-game preview</span>
+    <span class="fpill"><span class="fpill-dot"></span>3,233 AoC icons built-in</span>
+    <span class="fpill"><span class="fpill-dot"></span>One HTML file — fully offline</span>
+    <span class="fpill"><span class="fpill-dot"></span>Runs on Windows in any browser</span>
+  </div>
+  <p class="intro-text">
+    Script Studio is a <strong>single HTML file</strong> — no install, no account, no internet required.
+    Open it in any browser on Windows, write your script using colours, icons and chat commands,
+    and see exactly how it will look in-game before you paste it.
+    <br><br>
+    This survey has <strong>no script library built in</strong> — it opens clean and fast.
+    One of the questions below asks whether you would want a library added.
+    Your votes decide what gets built next.
+  </p>
+</div>
+
+<!-- ══ PRIVACY NOTICE ══ -->
+<div class="storage-notice">
+  <i class="sn-icon">&#9632;</i>
+  <span>
+    <strong>Privacy:</strong> this survey does not save anything to your browser by default.
+    Your answers exist only while the page is open. At the end you will have the option to
+    save your response on this device — that is entirely your choice.
+  </span>
+</div>
+
+<!-- ══ PROGRESS ══ -->
+<div class="progress-zone">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fg" id="progFill" style="width:0%"></div>
+  </div>
+  <div class="progress-meta">
+    <span class="progress-text" id="progText">Answer below — nothing is saved yet</span>
+    <span class="progress-pct" id="progPct">0%</span>
+  </div>
+</div>
+
+<form id="surveyForm" novalidate>
+
+<!-- ════ PART A — AWARENESS ════ -->
+<div class="sect-divider"><span>Part A &mdash; Awareness</span></div>
+
+<div class="card">
+  <span class="q-label cl">Question 1</span>
+  <div class="q-title">Had you heard of AoC Script Studio before today?</div>
+  <div class="rpills">
+    <label class="rpill"><input type="radio" name="awareness" value="never"> No — first time seeing it</label>
+    <label class="rpill"><input type="radio" name="awareness" value="heard"> Heard of it, never tried</label>
+    <label class="rpill"><input type="radio" name="awareness" value="tried"> Tried it once or twice</label>
+    <label class="rpill"><input type="radio" name="awareness" value="regular"> I use it regularly</label>
+  </div>
+</div>
+
+<div class="card card-cyan">
+  <span class="q-label cl">Question 2</span>
+  <div class="q-title">How do you currently make or get in-game scripts?</div>
+  <p class="q-hint">Select all that apply.</p>
+  <div class="chk-grid">
+    <label class="chk"><input type="checkbox" name="source" value="by_hand"><span class="chk-text">Write them manually<small>Directly in a .txt file</small></span></label>
+    <label class="chk"><input type="checkbox" name="source" value="guildmates"><span class="chk-text">Copy from guildmates<small>Shared in Discord or in-game</small></span></label>
+    <label class="chk"><input type="checkbox" name="source" value="fansite"><span class="chk-text">Download from fan sites<small>e.g. aoc.is-better-than.tv</small></span></label>
+    <label class="chk"><input type="checkbox" name="source" value="no_scripts"><span class="chk-text">I do not use scripts<small>Never got into it</small></span></label>
+    <label class="chk"><input type="checkbox" name="source" value="script_studio"><span class="chk-text">Script Studio already<small>That's how I found this survey</small></span></label>
+    <label class="chk"><input type="checkbox" name="source" value="other"><span class="chk-text">Something else<small>Describe in the open box later</small></span></label>
+  </div>
+</div>
+
+<!-- ════ PART B — THE LIBRARY QUESTION ════ -->
+<div class="sect-divider"><span>Part B &mdash; The Main Question</span></div>
+
+<div class="card-library-vote">
+  <span class="q-label or">Featured Vote</span>
+  <div class="q-title">Should Script Studio include a built-in script library?</div>
+  <p class="q-hint">
+    The current version ships with <strong>no library</strong> — it is lighter, loads faster, and has no clutter.
+    A library would provide ready-made scripts (raid calls, PvP coordination, guild announcements, UI macros)
+    that you can load and customise immediately. Your vote decides whether it gets built.
+  </p>
+
+  <div class="lib-vote-grid">
+    <label class="lib-vote-opt">
+      <input type="radio" name="library_vote" value="yes_full">
+      <div class="lib-vote-check">&#10003;</div>
+      <div class="lib-vote-indicator"></div>
+      <span class="lib-vote-label">Yes — add a full library</span>
+      <span class="lib-vote-desc">Ready-made scripts I can load, edit and use immediately. Raids, PvP, guild, emotes — all of it.</span>
+    </label>
+    <label class="lib-vote-opt">
+      <input type="radio" name="library_vote" value="yes_small">
+      <div class="lib-vote-check">&#10003;</div>
+      <div class="lib-vote-indicator"></div>
+      <span class="lib-vote-label">Yes — but keep it lean</span>
+      <span class="lib-vote-desc">A small set of essential templates only. No bloat — just the most useful scripts to get started.</span>
+    </label>
+    <label class="lib-vote-opt">
+      <input type="radio" name="library_vote" value="optional">
+      <div class="lib-vote-check">&#10003;</div>
+      <div class="lib-vote-indicator"></div>
+      <span class="lib-vote-label">Make it optional</span>
+      <span class="lib-vote-desc">Include the library but let me hide it. I want a clean editor with the library available if needed.</span>
+    </label>
+    <label class="lib-vote-opt">
+      <input type="radio" name="library_vote" value="no">
+      <div class="lib-vote-check">&#10003;</div>
+      <div class="lib-vote-indicator"></div>
+      <span class="lib-vote-label">No — keep it library-free</span>
+      <span class="lib-vote-desc">I prefer it clean and fast. I'll write my own scripts or get them from Discord. No library needed.</span>
+    </label>
+  </div>
+
+  <div id="libCatsWrap" style="display:none;margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--border)">
+    <p class="q-hint" style="margin-bottom:.75rem">Which script categories would you want in the library? Select all you would use.</p>
+    <div class="chk-grid">
+      <label class="chk"><input type="checkbox" name="lib_cats" value="raid_tactics"><span class="chk-text">Raid tactics &amp; boss calls</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="pvp"><span class="chk-text">PvP coordination</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="guild"><span class="chk-text">Guild announcements</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="emotes_rp"><span class="chk-text">Emotes &amp; roleplay</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="icon_art"><span class="chk-text">Icon art &amp; mosaics</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="ui_macros"><span class="chk-text">UI &amp; graphics toggles</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="loot"><span class="chk-text">Loot &amp; progression calls</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="trade"><span class="chk-text">Trade &amp; crafting ads</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="fun"><span class="chk-text">Mini-games &amp; fun scripts</span></label>
+      <label class="chk"><input type="checkbox" name="lib_cats" value="newbie"><span class="chk-text">New-player welcome scripts</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PART C — WHAT YOU'D USE ════ -->
+<div class="sect-divider"><span>Part C &mdash; Features</span></div>
+
+<div class="card card-gold">
+  <span class="q-label gl">Question 4</span>
+  <div class="q-title">Which tool features would you find most useful?</div>
+  <p class="q-hint">Select all that appeal to you — even if you have never used the tool.</p>
+  <div class="chk-grid">
+    <label class="chk"><input type="checkbox" name="features" value="color_picker"><span class="chk-text">Click-to-pick colour wheel<small>No need to memorise colour names</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="icon_search"><span class="chk-text">Search icons by name<small>Find icons without knowing the ID</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="templates"><span class="chk-text">Save your own templates<small>Reuse your script skeletons</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="export_pack"><span class="chk-text">Export a script pack<small>Bundle and share multiple scripts</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="linter"><span class="chk-text">Live error highlighting<small>Catch broken tags before pasting</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="mosaic"><span class="chk-text">Mosaic / pixel-art builder<small>Design icon art on a canvas</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="channel_preview"><span class="chk-text">Preview by channel type<small>Raid vs guild vs tell vs say</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="var_panel"><span class="chk-text">Variable helper panel<small>%1 %2 %3 placeholders shown clearly</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="collab"><span class="chk-text">Online guild script vault<small>Shared scripts your guild can edit</small></span></label>
+    <label class="chk"><input type="checkbox" name="features" value="dark_themes"><span class="chk-text">Additional visual themes<small>Alternative skins for the tool</small></span></label>
+  </div>
+</div>
+
+<!-- ════ PART D — PRIORITIES ════ -->
+<div class="sect-divider"><span>Part D &mdash; Priorities</span></div>
+
+<div class="card card-gold">
+  <span class="q-label gl">Question 5</span>
+  <div class="q-title">Rate how much each area matters to you</div>
+  <p class="q-hint">5 stars = must have &nbsp;&middot;&nbsp; 1 star = not a priority</p>
+  <div class="star-rows" id="starArea"></div>
+</div>
+
+<div class="card card-cyan">
+  <span class="q-label cl">Question 6</span>
+  <div class="q-title">How much do you agree with each statement?</div>
+  <p class="q-hint">Be direct — these answers determine what gets fixed first.</p>
+  <div class="likert-wrap">
+    <table class="likert-table" id="likertTable">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Strongly<br>disagree</th>
+          <th>Disagree</th>
+          <th>Neutral</th>
+          <th>Agree</th>
+          <th>Strongly<br>agree</th>
+        </tr>
+      </thead>
+      <tbody id="likertBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════ PART E — YOUR IDEAS ════ -->
+<div class="sect-divider"><span>Part E &mdash; Your Ideas</span></div>
+
+<div class="card card-green">
+  <span class="q-label gr">Question 7</span>
+  <div class="q-title">If you could add one thing to Script Studio, what would it be?</div>
+  <p class="q-hint">No constraints — a new mode, a small button, anything at all.</p>
+  <textarea name="dream_feature" placeholder="Describe any feature or improvement you would find valuable."></textarea>
+</div>
+
+<div class="card card-green">
+  <span class="q-label gr">Question 8</span>
+  <div class="q-title">What is the most frustrating part of writing AoC scripts right now?</div>
+  <p class="q-hint">Could be about the tool, the game's chat system, or the process in general.</p>
+  <textarea name="pain" placeholder="Describe the biggest pain point you encounter."></textarea>
+</div>
+
+<div class="card card-green">
+  <span class="q-label gr">Question 9</span>
+  <div class="q-title">Anything else you want to say?</div>
+  <p class="q-hint">Feedback, requests, or anything that did not fit above.</p>
+  <textarea name="wildcard" placeholder="Open field — any comments welcome."></textarea>
+</div>
+
+<!-- ════ PART F — ABOUT YOU ════ -->
+<div class="sect-divider"><span>Part F &mdash; About You (optional)</span></div>
+
+<div class="card">
+  <span class="q-label">Question 10 &mdash; Optional</span>
+  <div class="q-title">Who are you in-game?</div>
+  <p class="q-hint">Nothing here is required. Fill in whatever you are comfortable sharing.</p>
+  <div class="two-col" style="margin-bottom:.65rem">
+    <div class="field-wrap">
+      <label class="field-label" for="charName">Character Name</label>
+      <input type="text" id="charName" name="charName" placeholder="Your main character">
+    </div>
+    <div class="field-wrap">
+      <label class="field-label" for="guildName">Guild</label>
+      <input type="text" id="guildName" name="guildName" placeholder="e.g. Spartans">
+    </div>
+  </div>
+  <div class="field-wrap">
+    <label class="field-label" for="roleGame">Class / Role</label>
+    <input type="text" id="roleGame" name="roleGame" placeholder="e.g. Bear Shaman, Conqueror">
+  </div>
+
+  <div class="storage-vote-wrap">
+    <div class="storage-vote-title">Save your response on this device?</div>
+    <p class="storage-vote-desc">
+      By default nothing is stored. If you want your answers saved locally so a future version of
+      the tool can remember your preferences, select Yes below. Nothing is sent to any server.
+    </p>
+    <div class="storage-vote-opts">
+      <label class="svopt">
+        <input type="radio" name="save_pref" value="yes" class="yes-save"> Yes — save to this browser
+      </label>
+      <label class="svopt">
+        <input type="radio" name="save_pref" value="no" class="no-save" checked> No — do not save
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="submit-zone">
+  <button type="submit" id="submitBtn">Submit Survey</button>
+</div>
+
+</form>
+
+<div id="successPanel">
+  <h2>Response submitted</h2>
+  <p>Thank you. Your feedback has been recorded and will directly inform what Ep1cshovel builds next.<br>
+  Every vote on the library question counts.</p>
+  <div id="savedNote"></div>
+</div>
+
+<footer>
+  AoC Script Studio &nbsp;&middot;&nbsp; Fan-made tool for Age of Conan: Unchained &nbsp;&middot;&nbsp;
+  Built by <a href="#">Ep1cshovel</a> for the Spartans community
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+'use strict';
+
+// ── CHAT WINDOW ANIMATION ───────────────────────────────────────
+// Cycles through 3 script demonstrations in the mockup preview.
+// Professional: no typewriter theatrics, just clean fade-in lines.
+const demos = [
+  [
+    { cls:'ch-gold',   text:'====== RAID LEADER CALL ======' },
+    { cls:'ch-cyan',   text:'TARGET: Commander Yeng-Wang-Yeh' },
+    { cls:'ch-red',    text:'INTERRUPT Wrath of Yeng — priority!' },
+    { cls:'ch-purple', text:'TANKS hold south wall position.' },
+    { cls:'ch-green',  text:'Healers stack group B — ignore red.' },
+    { cls:'ch-dim',    text:'— AoC Script Studio · Ep1cshovel —' },
+  ],
+  [
+    { cls:'ch-gold',   text:'====== GUILD ANNOUNCEMENT ======' },
+    { cls:'ch-white',  text:'Raid ID reset: Saturday 20:00 CET.' },
+    { cls:'ch-cyan',   text:'Sign-up via Discord before Friday.' },
+    { cls:'ch-white',  text:'Required: T4 gear or above.' },
+    { cls:'ch-green',  text:'Contact Ep1cshovel for questions.' },
+    { cls:'ch-dim',    text:'— AoC Script Studio · Spartans —' },
+  ],
+  [
+    { cls:'ch-gold',   text:'====== PVP COORDINATION =======' },
+    { cls:'ch-red',    text:'PUSH — Gate 3, follow the tank!' },
+    { cls:'ch-white',  text:'Healers: do NOT chase kills.' },
+    { cls:'ch-cyan',   text:'CC priority: Necros then Priests.' },
+    { cls:'ch-purple', text:'RETREAT signal: /g FALL BACK' },
+    { cls:'ch-dim',    text:'— AoC Script Studio · Ep1cshovel —' },
+  ],
+];
+
+let demoIndex = 0;
+let demoTimer = null;
+
+function runDemo(chatEl, lines, onDone) {
+  chatEl.innerHTML = '';
+  lines.forEach((line, i) => {
+    setTimeout(() => {
+      const s = document.createElement('span');
+      s.className = 'chat-line ' + line.cls + ' anim';
+      s.style.animationDelay = '0s';
+      s.textContent = line.text;
+      chatEl.appendChild(s);
+    }, i * 380);
+  });
+  // pause on last frame then cycle
+  if (onDone) setTimeout(onDone, lines.length * 380 + 2200);
+}
+
+function cycleDemos() {
+  const chatEl = document.getElementById('chatWindow');
+  if (!chatEl) return;
+  runDemo(chatEl, demos[demoIndex], () => {
+    demoIndex = (demoIndex + 1) % demos.length;
+    cycleDemos();
+  });
+}
+cycleDemos();
+
+// ── LIBRARY VOTE → show/hide categories ─────────────────────────
+document.querySelectorAll('[name="library_vote"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const v = document.querySelector('[name="library_vote"]:checked')?.value || '';
+    const show = (v === 'yes_full' || v === 'yes_small' || v === 'optional');
+    document.getElementById('libCatsWrap').style.display = show ? 'block' : 'none';
+    updateProgress();
+  });
+});
+
+// ── STAR RATINGS ─────────────────────────────────────────────────
+const starItems = [
+  { key:'editor_ease',     label:'Editor usability',           hint:'Toolbar buttons, helpers, colour tools' },
+  { key:'icon_browser',    label:'Icon browser',               hint:'Search and browse rdb:// icons' },
+  { key:'preview_quality', label:'In-game preview accuracy',   hint:'Closer to what appears in chat' },
+  { key:'export_share',    label:'Export and sharing options', hint:'Send scripts to guildmates' },
+  { key:'library_content', label:'Ready-made script library',  hint:'Built-in scripts to load and edit' },
+  { key:'error_checking',  label:'Script error checking',      hint:'Catch broken tags and syntax errors' },
+  { key:'performance',     label:'Load speed and performance', hint:'How fast the tool opens and runs' },
+];
+const ratings = {};
+const starArea = document.getElementById('starArea');
+
+starItems.forEach(item => {
+  ratings[item.key] = 0;
+  const row = document.createElement('div');
+  row.className = 'star-row';
+  row.innerHTML = `
+    <span class="star-row-label">${item.label}<small>${item.hint}</small></span>
+    <div class="stars" data-key="${item.key}">
+      ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" title="${n} star${n>1?'s':''}">&#9733;</span>`).join('')}
+    </div>`;
+  starArea.appendChild(row);
+});
+
+starArea.addEventListener('click', e => {
+  const star = e.target.closest('.star');
+  if (!star) return;
+  const g = star.closest('.stars');
+  const val = parseInt(star.dataset.val);
+  ratings[g.dataset.key] = val;
+  g.querySelectorAll('.star').forEach(s => s.classList.toggle('lit', +s.dataset.val <= val));
+  updateProgress();
+});
+
+// ── LIKERT TABLE ─────────────────────────────────────────────────
+const likertRows = [
+  { key:'hard_markup',    text:'Learning AoC chat markup is too difficult' },
+  { key:'no_time',        text:'I do not have time to write scripts from scratch' },
+  { key:'didnt_know',     text:'I was not aware tools like this existed' },
+  { key:'raids_better',   text:'Well-crafted scripts genuinely improve raid outcomes' },
+  { key:'guild_identity', text:'Custom scripts give a guild a distinct identity' },
+  { key:'want_collab',    text:'I would use a shared guild script library online' },
+  { key:'library_bloat',  text:'A built-in library would make the tool feel cluttered' },
+];
+const likertVals = {};
+const tbody = document.getElementById('likertBody');
+
+likertRows.forEach(({ key, text }) => {
+  likertVals[key] = '';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${text}</td>` +
+    [1,2,3,4,5].map(n =>
+      `<td><input type="radio" name="lk_${key}" value="${n}" data-lkey="${key}"></td>`
+    ).join('');
+  tbody.appendChild(tr);
+});
+
+document.getElementById('likertTable').addEventListener('change', e => {
+  const k = e.target.dataset.lkey;
+  if (k) { likertVals[k] = e.target.value; updateProgress(); }
+});
+
+// ── PROGRESS ─────────────────────────────────────────────────────
+const TOTAL = 8;
+
+function sectionsDone() {
+  let n = 0;
+  if (document.querySelector('[name="awareness"]:checked'))          n++;
+  if (document.querySelectorAll('[name="source"]:checked').length)   n++;
+  if (document.querySelector('[name="library_vote"]:checked'))       n++;
+  if (document.querySelectorAll('[name="features"]:checked').length) n++;
+  if (Object.values(ratings).some(v => v > 0))                       n++;
+  if (Object.values(likertVals).some(v => v !== ''))                  n++;
+  if ((document.querySelector('[name="dream_feature"]')?.value||'').trim()) n++;
+  if ((document.querySelector('[name="pain"]')?.value||'').trim())          n++;
+  return n;
+}
+
+function updateProgress() {
+  const done = sectionsDone();
+  const pct  = Math.round(done / TOTAL * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progPct').textContent  = pct + '%';
+  document.getElementById('progText').textContent =
+    pct === 100 ? 'All key sections complete — ready to submit' :
+    `${done} of ${TOTAL} key sections answered  \u00b7  nothing saved yet`;
+}
+
+document.querySelectorAll('input,textarea').forEach(el => {
+  el.addEventListener(
+    (el.type === 'radio' || el.type === 'checkbox') ? 'change' : 'input',
+    updateProgress
+  );
+});
+
+// ── SUBMIT ────────────────────────────────────────────────────────
+// ▶ STEP 1: Paste your Google Apps Script Web App URL here after deployment.
+//   Leave as empty string while testing locally — survey still works offline.
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw7EUu-mwPUUENwiKTT08WwIHvBvd9W4axAfzb0OyXAeTFNAPSaqqYYjxnpePovWv8/exec';
+
+document.getElementById('surveyForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  const gather = n => [...document.querySelectorAll(`[name="${n}"]:checked`)].map(i=>i.value);
+  const txt    = n => (document.querySelector(`[name="${n}"]`)?.value || '').trim();
+  const radio  = n => document.querySelector(`[name="${n}"]:checked`)?.value || '';
+
+  const response = {
+    timestamp:     new Date().toISOString(),
+    awareness:     radio('awareness'),
+    source:        gather('source').join(', '),
+    library_vote:  radio('library_vote'),
+    lib_cats:      gather('lib_cats').join(', '),
+    features:      gather('features').join(', '),
+    star_editor:   ratings['editor_ease']     || 0,
+    star_icons:    ratings['icon_browser']    || 0,
+    star_preview:  ratings['preview_quality'] || 0,
+    star_export:   ratings['export_share']    || 0,
+    star_library:  ratings['library_content'] || 0,
+    star_errors:   ratings['error_checking']  || 0,
+    star_speed:    ratings['performance']     || 0,
+    lk_hard_markup:    likertVals['hard_markup']    || '',
+    lk_no_time:        likertVals['no_time']        || '',
+    lk_didnt_know:     likertVals['didnt_know']     || '',
+    lk_raids_better:   likertVals['raids_better']   || '',
+    lk_guild_identity: likertVals['guild_identity'] || '',
+    lk_want_collab:    likertVals['want_collab']    || '',
+    lk_library_bloat:  likertVals['library_bloat']  || '',
+    dream_feature: txt('dream_feature'),
+    pain:          txt('pain'),
+    wildcard:      txt('wildcard'),
+    charName:      txt('charName'),
+    guildName:     txt('guildName'),
+    roleGame:      txt('roleGame'),
+  };
+
+  // ── Send to Google Sheets ────────────────────────────────────────
+  let sheetOk = false;
+  if (SHEET_URL) {
+    try {
+      await fetch(SHEET_URL, {
+        method:  'POST',
+        // no-cors: Google Apps Script doesn't return CORS headers on redirect,
+        // but the POST still lands in the Sheet. We just can't read the response.
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(response),
+      });
+      sheetOk = true;
+    } catch (err) {
+      console.warn('[AoC Survey] Sheet POST failed:', err);
+    }
+  }
+
+  // ── Optional localStorage backup ────────────────────────────────
+  const wantsSave = radio('save_pref') === 'yes';
+  if (wantsSave) {
+    try {
+      const all = JSON.parse(localStorage.getItem('aoc_ss_survey_v4') || '[]');
+      all.push(response);
+      localStorage.setItem('aoc_ss_survey_v4', JSON.stringify(all));
+    } catch(_) {}
+  }
+
+  // ── Status note ──────────────────────────────────────────────────
+  let note = '';
+  if (SHEET_URL && sheetOk)  note = 'Response sent to the results sheet.';
+  else if (SHEET_URL)        note = 'Could not reach the sheet — response saved locally.';
+  else                       note = 'Sheet URL not configured — running in local mode.';
+  if (wantsSave)             note += ' Also saved to this browser.';
+  document.getElementById('savedNote').textContent = note;
+
+  console.log('[AoC Survey v4] Response:', response);
+
+  document.getElementById('surveyForm').style.display = 'none';
+  document.getElementById('successPanel').style.display = 'block';
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+</script>
+</body>
+</html>
