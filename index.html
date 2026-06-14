@@ -777,6 +777,17 @@ footer a:hover{color:var(--text)}
   </div>
 </div>
 
+<!-- Already voted panel — shown instead of form if flag is set -->
+<div id="alreadyVotedPanel" style="display:none;background:#0e0c18;border:1px solid var(--border-lit);border-radius:var(--r-lg);padding:2.5rem;text-align:center;margin-bottom:2rem;">
+  <div style="font-size:2rem;margin-bottom:.75rem;">&#9632;</div>
+  <div style="font-family:'Chakra Petch',monospace;font-size:1.1rem;color:var(--cyan);margin-bottom:.5rem;letter-spacing:.04em;">Response Already Recorded</div>
+  <p style="color:var(--dim);font-size:.9rem;line-height:1.7;max-width:440px;margin:0 auto;">
+    You have already submitted a response from this browser.<br>
+    Your vote has been counted — thank you.<br><br>
+    <span style="font-size:.8rem;color:var(--dimmer);">If you believe this is a mistake, clear your browser's site data for this page and reload.</span>
+  </p>
+</div>
+
 <form id="surveyForm" novalidate>
 
 <!-- ════ PART A — AWARENESS ════ -->
@@ -1005,6 +1016,23 @@ footer a:hover{color:var(--text)}
 <script>
 'use strict';
 
+// ── ALREADY VOTED CHECK ──────────────────────────────────────────
+// Runs immediately on page load — before anything else renders.
+// If the flag exists, hide the form and show the already-voted panel.
+(function() {
+  try {
+    if (localStorage.getItem('aoc_ss_voted') === '1') {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('surveyForm').style.display      = 'none';
+        document.getElementById('alreadyVotedPanel').style.display = 'block';
+        // Still run the demo animation in the hero — page looks alive
+      });
+    }
+  } catch(_) {
+    // localStorage blocked (private browsing etc) — just show the form normally
+  }
+})();
+
 // ── CHAT WINDOW ANIMATION ───────────────────────────────────────
 // Cycles through 3 script demonstrations in the mockup preview.
 // Professional: no typewriter theatrics, just clean fade-in lines.
@@ -1231,6 +1259,10 @@ document.getElementById('surveyForm').addEventListener('submit', async function(
       console.warn('[AoC Survey] Sheet POST failed:', err);
     }
   }
+
+  // ── Mark this browser as having voted ───────────────────────────
+  // Set regardless of Sheet success so retries don't create duplicates.
+  try { localStorage.setItem('aoc_ss_voted', '1'); } catch(_) {}
 
   // ── Optional localStorage backup ────────────────────────────────
   const wantsSave = radio('save_pref') === 'yes';
